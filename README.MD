@@ -1,4 +1,4 @@
-# RepoLENS
+# RepoLens
 
 RepoLENS is an AI-powered project reviewer, codebase mapper, and interactive interview preparation arena. By crawling a public GitHub repository or parsing an uploaded project PDF report, RepoLENS constructs a comprehensive codebase mapping, extracts structural and data flows, detects technology stacks, and generates project-specific mock interview questions with live AI answer evaluation.
 
