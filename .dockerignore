@@ -1,0 +1,25 @@
+# Exclude git tracking files
+.git
+.gitignore
+.dockerignore
+
+# Exclude local project documentation and system logs
+*.md
+.gemini/
+
+# Exclude backend dependencies and virtual environments
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/venv/
+backend/.venv/
+backend/env/
+backend/.env
+backend/repolens_*
+
+# Exclude frontend node modules and local builds
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.eslintcache
