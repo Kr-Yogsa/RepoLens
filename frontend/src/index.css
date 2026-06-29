@@ -1,34 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
+
 :root {
-  --font-headings: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-headings: 'Sora', 'Manrope', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
 
-  /* Colors */
-  --bg-primary: #07090e;
-  --bg-secondary: #0d121d;
-  --bg-card: rgba(15, 23, 42, 0.45);
-  --bg-card-hover: rgba(22, 33, 58, 0.6);
-  --bg-input: rgba(10, 15, 28, 0.7);
-  
-  --border-glow: rgba(0, 242, 254, 0.15);
-  --border-light: rgba(255, 255, 255, 0.07);
-  --border-focus: rgba(0, 242, 254, 0.5);
+  --bg-primary: #07111b;
+  --bg-secondary: #0d1b2a;
+  --bg-card: rgba(11, 20, 32, 0.7);
+  --bg-card-hover: rgba(17, 29, 44, 0.82);
+  --bg-input: rgba(6, 13, 23, 0.84);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --border-light: rgba(255, 255, 255, 0.08);
 
-  --accent-cyan: #00f2fe;
-  --accent-purple: #9d4edd;
-  --accent-blue: #3a86c8;
-  --accent-green: #10b981;
-  --accent-orange: #f59e0b;
-  --accent-red: #ef4444;
+  --text-primary: #f5f7fb;
+  --text-secondary: #b3c0d4;
+  --text-muted: #71819b;
 
-  --glow-cyan: 0 0 15px rgba(0, 242, 254, 0.25);
-  --glow-purple: 0 0 15px rgba(157, 78, 221, 0.25);
+  --accent-orange: #ff7a18;
+  --accent-amber: #ffb84d;
+  --accent-teal: #1ec4b4;
+  --accent-blue: #586fff;
+  --accent-green: #37d3a0;
+  --accent-red: #ef6262;
 
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -37,72 +33,69 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: var(--font-body);
-  background-color: var(--bg-primary);
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(157, 78, 221, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.08) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: var(--text-primary);
   min-height: 100vh;
-  overflow-x: hidden;
+  font-family: var(--font-body);
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-headings);
-  font-weight: 600;
-  letter-spacing: -0.02em;
   color: var(--text-primary);
+  background:
+    linear-gradient(180deg, #07111b 0%, #091521 48%, #08131d 100%);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-button, input, textarea, select {
-  font-family: inherit;
+a {
   color: inherit;
 }
 
-/* Custom Scrollbar */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-headings);
+  letter-spacing: -0.03em;
+}
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 242, 254, 0.4);
+  background: rgba(255, 184, 77, 0.3);
 }
 
-/* Glassmorphism Classes */
 .glass-panel {
   background: var(--bg-card);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
-}
-
-.glass-panel-hover:hover {
-  background: var(--bg-card-hover);
-  border-color: rgba(0, 242, 254, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transition: all var(--transition-normal);
-}
-
-/* Text glow effects */
-.glow-text-cyan {
-  text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
-}
-
-.glow-text-purple {
-  text-shadow: 0 0 10px rgba(157, 78, 221, 0.5);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px);
 }

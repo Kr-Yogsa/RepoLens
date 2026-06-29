@@ -49,6 +49,9 @@ def set_task(task_id, data):
             TASKS[task_id] = {}
         TASKS[task_id].update(data)
 
+class RepositoryError(Exception):
+    pass
+
 def run_repo_task_background(task_id, repo_url, provider, api_key, model_name):
     # Set status to running
     set_task(task_id, {"status": "running"})
@@ -64,6 +67,12 @@ def run_repo_task_background(task_id, repo_url, provider, api_key, model_name):
         llm = LLMInterface(provider, api_key, model_name)
         
         # Step 2: Fetch Repo
+        import re
+        clean_url = repo_url.strip().rstrip('/')
+        url_match = re.search(r'github\.com[:/]([^/]+)/([^/]+)', clean_url, re.IGNORECASE)
+        if not url_match:
+            raise RepositoryError("Invalid GitHub URL format. Please check the repository URL.")
+            
         temp_dir = tempfile.mkdtemp(prefix="repolens_")
         workspace_dir = temp_dir
         
@@ -80,7 +89,7 @@ def run_repo_task_background(task_id, repo_url, provider, api_key, model_name):
             
             download_success = download_github_zip(repo_url, temp_dir, logger)
             if not download_success:
-                raise Exception("Failed to clone repository or download zipball. Please check if the repository is public and your internet connection is active.")
+                raise RepositoryError("Repository not found or it is private.")
             
             # Find the extracted root directory inside temp_dir (GitHub zipballs contain a single outer directory)
             extracted_items = os.listdir(temp_dir)
@@ -98,6 +107,14 @@ def run_repo_task_background(task_id, repo_url, provider, api_key, model_name):
         })
         logger.log("Task completed successfully!")
         
+    except RepositoryError as re:
+        traceback.print_exc()
+        error_msg = str(re)
+        logger.log(f"Task failed: {error_msg}")
+        set_task(task_id, {
+            "status": "failed",
+            "error": error_msg
+        })
     except Exception as e:
         traceback.print_exc()
         error_msg = str(e)
@@ -157,32 +174,35 @@ def subprocess_clone(repo_url, target_dir, logger):
     try:
         # Command: git clone --depth 1 <repo_url> <target_dir>
         cmd = ["git", "clone", "--depth", "1", repo_url, target_dir]
-        logger.log(f"Running command: {' '.join(cmd)}")
+        logged_cmd = ["git", "clone", "--depth", "1", repo_url, "<temp_workspace>"]
+        logger.log(f"Running command: {' '.join(logged_cmd)}")
         process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120)
         if process.returncode != 0:
-            logger.log(f"Git Clone Error: {process.stderr}")
+            err_msg = process.stderr.replace(target_dir, "<temp_workspace>")
+            logger.log(f"Git Clone Error: {err_msg}")
             return False
         return True
     except Exception as e:
-        logger.log(f"Git execution failed: {str(e)}")
+        err_msg = str(e).replace(target_dir, "<temp_workspace>")
+        logger.log(f"Git execution failed: {err_msg}")
         return False
 
 def download_github_zip(repo_url, target_dir, logger):
     """Downloads repository as a ZIP archive directly from the GitHub API and extracts it."""
     try:
+        import re
         # Clean URL
-        clean_url = repo_url.rstrip('/')
-        if clean_url.endswith('.git'):
-            clean_url = clean_url[:-4]
-            
-        parts = clean_url.split('/')
-        if len(parts) < 5:
+        clean_url = repo_url.strip().rstrip('/')
+        match = re.search(r'github\.com[:/]([^/]+)/([^/]+)', clean_url, re.IGNORECASE)
+        if not match:
             logger.log("Invalid GitHub URL format.")
             return False
             
-        owner = parts[-2]
-        repo = parts[-1]
-        
+        owner = match.group(1)
+        repo = match.group(2)
+        if repo.endswith('.git'):
+            repo = repo[:-4]
+            
         # GitHub API redirects zipball to the default branch's zip archive
         zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball"
         logger.log(f"Downloading repository zipball from GitHub API: {zip_url}...")
@@ -320,6 +340,7 @@ def review_answer():
             "You are an expert technical interviewer and AI mentor. You will evaluate the candidate's answer "
             "to a project-specific interview question against the correct model answer. Provide constructive "
             "feedback, grade the answer, and point out what is correct, what is missing, and how to improve it.\n"
+            "Keep your feedback high-impact and concise (under 2-3 sentences per section).\n"
             "You must return your feedback in a raw JSON object with this exact schema:\n"
             "{\n"
             "  \"score\": 75, // A score out of 100\n"
@@ -362,10 +383,10 @@ def get_interview_answer():
         
         system_prompt = (
             "You are an expert technical interviewer and senior developer. For the given technical interview "
-            "question, provide a detailed, comprehensive model answer. Explain the concepts clearly and "
-            "provide best practices."
+            "question, provide a concise, high-impact model answer. Focus on key explanations and best "
+            "practices in under 3 short paragraphs or bullet points."
         )
-        user_prompt = f"Provide a detailed model answer for this interview question: {question}"
+        user_prompt = f"Provide a concise model answer for this interview question: {question}"
         
         response_str = llm.call(system_prompt, user_prompt, response_json=False)
         return jsonify({"answer": response_str})
